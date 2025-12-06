@@ -1,0 +1,56 @@
+name: Ejercicio 3 - Pipeline con Múltiples Jobs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+      
+      - name: Verificar código
+        run: echo "Código verificado correctamente"
+
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+      
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      
+      - name: Ejecutar tests
+        run: npm test
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+      
+      - name: Crear build-info.txt
+        run: |
+          echo "Build Date: $(date)" > build-info.txt
+          echo "Version: 1.0.0" >> build-info.txt
+      
+      - name: Mostrar contenido del archivo
+        run: cat build-info.txt
+      
+      - name: Build completado
+        run: echo "Build completado exitosamente"
+      
+      - name: Subir artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: build-info.txt
